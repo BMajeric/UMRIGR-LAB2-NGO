@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3811945971936960028}
   - component: {fileID: 6371994443899315205}
   - component: {fileID: 5484673837901641877}
+  - component: {fileID: 1902905943981982174}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Floor
@@ -146,7 +147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 0
+  GlobalObjectIdHash: 3107783870
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -155,3 +156,16 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &1902905943981982174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5297302709335393516}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ed6f3520e35f104b9ec16f7f981f0e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerName: 

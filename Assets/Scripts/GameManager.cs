@@ -348,7 +348,7 @@ public class GameManager : NetworkBehaviour
         //deactivate waitingForPlayer GameObject
         waitingForPlayer.SetActive(false);
         //activate colorSelectActive GameObject
-        colorSelectActive.SetActive(false);
+        colorSelectActive.SetActive(true);
     }
 
     //TODO: Only the Server can run this function
@@ -422,6 +422,7 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Everyone)]
     private void ResetGameRpc()
     {
+        endScreen.SetActive(false);
         //deactivate gameCountdown GameObject
         gameCountdown.SetActive(false);
         //reset player position
