@@ -35,6 +35,16 @@ public class GameManager : NetworkBehaviour
     float timerTimeRemaining;
     private Dictionary<string, int> playerScores = new Dictionary<string, int>();
     public List<Color> playerColors = new List<Color>();
+    
+    private GameObject[] wallsList;
+    private int wallsListLength;
+    
+    [SerializeField]
+    [Header("The distance a wall needs to be from a player to enable it to be toggled on or off")]
+    private float wallDistanceThreshold = 1f;
+    [SerializeField]
+    [Header("Number of seconds after which a new wall is toggled on or off")]
+    private float wallToggleInterval = 2f;
 
     private void Start()
     {
@@ -65,6 +75,8 @@ public class GameManager : NetworkBehaviour
         gameTimer = GameObject.Find("GameCountdown").GetComponent<TMP_Text>();
         resultText = GameObject.Find("ResultText").GetComponent<TMP_Text>();
         scoreText = GameObject.Find("ScoreText").GetComponent<TMP_Text>();
+        wallsList = GameObject.FindGameObjectsWithTag("Wall");
+        wallsListLength = wallsList.Length;
         waitingForPlayer.SetActive(false);
         colorSelectActive.SetActive(false);
         colorSelectInactive.SetActive(false);
@@ -75,7 +87,35 @@ public class GameManager : NetworkBehaviour
         gameRunningState = false;
         countdownTimeRemaining = COUNTDOWN_DURATION;
         timerTimeRemaining = TIMER_DURATION;
-        networkManager.OnClientConnectedCallback += OnPlayerConnected;       
+        networkManager.OnClientConnectedCallback += OnPlayerConnected;
+    }
+
+    private void ToggleRandomWall()
+    {
+        if (wallsListLength == 0) return;
+
+        int randomIndex = Random.Range(0, wallsListLength);
+        GameObject wall = wallsList[randomIndex];
+        bool toggledState = ShouldWallBeToggled(wall);
+        wall.SetActive(toggledState);
+
+        NotifyWallStateChangeRpc(randomIndex, toggledState);
+    }
+
+    private bool ShouldWallBeToggled(GameObject wall)
+    {
+        foreach (var player in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            Transform playerTransform = player.PlayerObject.transform;
+            float distance = Vector3.Distance(playerTransform.position, wall.transform.position);
+            if (distance < wallDistanceThreshold)
+            {
+                Debug.Log("Wall " + wall.name + "can't be toggled");
+                return wall.activeSelf;
+            }
+        }
+        Debug.Log("Wall " + wall.name + "should be toggled");
+        return !wall.activeSelf;
     }
 
     private void OnPlayerConnected(ulong obj)
@@ -404,6 +444,21 @@ public class GameManager : NetworkBehaviour
         EnablePlayerMovement();
         //activate the gameRunningState trigger
         gameRunningState = true;
+
+        if (IsHost)
+        {
+            InvokeRepeating(nameof(ToggleRandomWall), wallToggleInterval, wallToggleInterval);
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void NotifyWallStateChangeRpc(int wallIndex, bool newState)
+    {
+        if (wallIndex >= 0 && wallIndex < wallsListLength)
+        {
+            wallsList[wallIndex].SetActive(newState);
+            Debug.Log("Rpc for wall: " + wallsList[wallIndex].name);
+        }
     }
 
     //TODO: All entities should activate this function
@@ -416,6 +471,8 @@ public class GameManager : NetworkBehaviour
         DeactivateFloor();
         //disable players movement
         DisablePlayerMovement();
+
+        CancelInvoke(nameof(ToggleRandomWall));
     }
 
     //TODO: All entities should activate this function
