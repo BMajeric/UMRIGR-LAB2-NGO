@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 using UnityEngine.UI;
+using System.Linq;
 
 public class GameManager : NetworkBehaviour
 {
@@ -36,9 +37,11 @@ public class GameManager : NetworkBehaviour
     private Dictionary<string, int> playerScores = new Dictionary<string, int>();
     public List<Color> playerColors = new List<Color>();
     
-    private GameObject[] wallsList;
+    private List<GameObject> activeWallsList;
+    private List<GameObject> inactiveWallsList;
     private int wallsListLength;
-    
+    private List<GameObject> wallsList;
+
     [SerializeField]
     [Header("The distance a wall needs to be from a player to enable it to be toggled on or off")]
     private float wallDistanceThreshold = 1f;
@@ -75,8 +78,16 @@ public class GameManager : NetworkBehaviour
         gameTimer = GameObject.Find("GameCountdown").GetComponent<TMP_Text>();
         resultText = GameObject.Find("ResultText").GetComponent<TMP_Text>();
         scoreText = GameObject.Find("ScoreText").GetComponent<TMP_Text>();
-        wallsList = GameObject.FindGameObjectsWithTag("Wall");
-        wallsListLength = wallsList.Length;
+        
+        activeWallsList = GameObject.FindGameObjectsWithTag("Wall").ToList();
+        inactiveWallsList = GameObject.FindGameObjectsWithTag("InactiveWall").ToList();
+        wallsList = activeWallsList.Union(inactiveWallsList).ToList();
+        wallsListLength = wallsList.Count;
+        foreach (var wall in inactiveWallsList)
+        {
+            wall.SetActive(false);
+        }
+
         waitingForPlayer.SetActive(false);
         colorSelectActive.SetActive(false);
         colorSelectInactive.SetActive(false);
